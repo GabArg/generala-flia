@@ -3,167 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Generala - Anotador Pro</title>
+    <title>Generala Pro - Guardado Automático</title>
     <style>
-        :root {
-            --primary: #1a73e8;
-            --bg: #f1f3f4;
-            --text: #202124;
-            --success: #34a853;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text);
-            margin: 0; 
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container { width: 100%; max-width: 600px; }
-
-        .header-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-
-        h2 { margin: 0 0 15px 0; text-align: center; color: var(--primary); }
-
-        .input-group { display: flex; gap: 10px; }
-        input[type="text"] { 
-            flex: 1; 
-            padding: 12px; 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            font-size: 16px;
-        }
-
-        .btn-add { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
-
-        .table-wrapper {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-
-        table { border-collapse: collapse; width: 100%; min-width: 300px; }
-        th, td { border-bottom: 1px solid #f0f0f0; padding: 10px; text-align: center; }
-        
-        .cat-name { 
-            text-align: left; 
-            font-weight: bold; 
-            background: #f8f9fa; 
-            position: sticky; 
-            left: 0; 
-            z-index: 2;
-            color: #5f6368;
-            min-width: 100px;
-        }
-
-        .score-input { 
-            width: 55px; 
-            height: 40px; 
-            border: 1px solid #ced4da; 
-            border-radius: 6px; 
-            text-align: center; 
-            font-size: 18px; 
-            font-weight: bold;
-        }
-
+        :root { --primary: #1a73e8; --bg: #f1f3f4; --text: #202124; --danger: #ea4335; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 800px; }
+        .header-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .input-group { display: flex; gap: 8px; }
+        input[type="text"], input[type="number"] { padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 15px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
+        .cat-name { text-align: left; background: #f8f9fa; font-weight: bold; min-width: 100px; position: sticky; left: 0; z-index: 2; }
+        .player-name-edit { border: none; background: transparent; color: white; font-weight: bold; text-align: center; width: 80px; font-size: 14px; }
+        th { background: #2c3e50; color: white; min-width: 110px; }
+        .delete-p { color: #ff8a80; cursor: pointer; font-size: 11px; display: block; margin-top: 4px; }
+        .score-input { width: 60px; height: 40px; border: 1px solid #ced4da; border-radius: 6px; text-align: center; font-size: 18px; font-weight: bold; }
         .total-row { background: var(--primary); color: white; font-weight: bold; }
-        .total-val { font-size: 20px; color: #fff; }
-
-        .btn-reset { 
-            background: #ea4335; 
-            color: white; 
-            border: none; 
-            width: 100%; 
-            padding: 15px; 
-            border-radius: 10px; 
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 30px;
-        }
+        .btn-reset { background: var(--danger); color: white; border: none; width: 100%; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-card">
-        <h2>🎲 Generala</h2>
+        <h2 style="margin:0 0 10px 0; text-align:center; color:var(--primary);">🎲 Anotador con Memoria</h2>
         <div class="input-group">
-            <input type="text" id="playerName" placeholder="Nombre del jugador...">
-            <button class="btn-add" onclick="addPlayer()">Añadir</button>
+            <input type="text" id="playerName" placeholder="Nombre...">
+            <button class="btn-add" onclick="addPlayer()">+ Añadir</button>
         </div>
     </div>
-
     <div class="table-wrapper">
         <table id="gameTable">
-            <thead>
-                <tr id="hRow"><th class="cat-name">JUGADAS</th></tr>
-            </thead>
+            <thead><tr id="hRow"><th class="cat-col">JUGADAS</th></tr></thead>
             <tbody id="bRow"></tbody>
-            <tfoot>
-                <tr id="fRow" class="total-row"><td class="cat-name" style="background: var(--primary); color:white;">TOTAL</td></tr>
-            </tfoot>
+            <tfoot><tr id="fRow" class="total-row"><td class="cat-col" style="background:var(--primary); color:white;">TOTAL</td></tr></tfoot>
         </table>
     </div>
-
-    <button class="btn-reset" onclick="resetGame()">Reiniciar Puntos</button>
+    <button class="btn-reset" onclick="resetGame()">Nueva Partida (Borrar todo)</button>
 </div>
 
 <script>
     const categorias = ["1", "2", "3", "4", "5", "6", "Escalera", "Full", "Póker", "Generala", "Doble G."];
-    let pCount = 0;
+    let players = JSON.parse(localStorage.getItem('generala_data')) || [];
 
     function init() {
         const b = document.getElementById('bRow');
+        b.innerHTML = "";
         categorias.forEach(c => {
-            b.innerHTML += `<tr id="r-${c}"><td class="cat-name">${c}</td></tr>`;
+            b.innerHTML += `<tr id="r-${c}"><td class="cat-col">${c}</td></tr>`;
         });
+        // Cargar jugadores guardados
+        const tempPlayers = [...players];
+        players = []; // Limpiamos para no duplicar al re-renderizar
+        document.getElementById('hRow').innerHTML = '<th class="cat-col">JUGADAS</th>';
+        document.getElementById('fRow').innerHTML = '<td class="cat-col" style="background:var(--primary); color:white;">TOTAL</td>';
+        tempPlayers.forEach(p => addPlayer(p.name, p.scores, p.id));
     }
 
-    function addPlayer() {
+    function addPlayer(existingName = null, existingScores = {}, existingId = null) {
         const inp = document.getElementById('playerName');
-        const name = inp.value.trim();
+        const name = existingName || inp.value.trim();
         if(!name) return;
 
-        document.getElementById('hRow').innerHTML += `<th>${name}</th>`;
+        const id = existingId || `p-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+        
+        if(!existingName) {
+            players.push({ id, name, scores: {} });
+            save();
+        }
+
+        document.getElementById('hRow').innerHTML += `
+            <th id="h-${id}">
+                <input type="text" class="player-name-edit" value="${name}" oninput="editName('${id}', this.value)">
+                <span class="delete-p" onclick="removePlayer('${id}')">✕ Quitar</span>
+            </th>`;
+        
         categorias.forEach(c => {
             const r = document.getElementById(`r-${c}`);
-            r.innerHTML += `<td><input type="number" class="score-input p-${pCount}" oninput="calc(${pCount})" placeholder="0"></td>`;
+            const score = existingScores[c] || "";
+            r.innerHTML += `<td class="cell-${id}"><input type="number" class="score-input" value="${score}" oninput="updateScore('${id}', '${c}', this.value)" placeholder="-"></td>`;
         });
-        document.getElementById('fRow').innerHTML += `<td id="t-${pCount}" class="total-val">0</td>`;
-        
+
+        document.getElementById('fRow').innerHTML += `<td id="t-${id}" class="total-val cell-${id}">0</td>`;
         inp.value = '';
-        pCount++;
+        calcTotal(id);
     }
 
-    function calc(idx) {
-        let sum = 0;
-        document.querySelectorAll(`.p-${idx}`).forEach(i => {
-            sum += (parseInt(i.value) || 0);
-        });
-        document.getElementById(`t-${idx}`).innerText = sum;
+    function editName(id, newName) {
+        const p = players.find(p => p.id === id);
+        if(p) p.name = newName;
+        save();
     }
+
+    function updateScore(id, cat, val) {
+        const p = players.find(p => p.id === id);
+        if(p) p.scores[cat] = val;
+        save();
+        calcTotal(id);
+    }
+
+    function calcTotal(id) {
+        const p = players.find(p => p.id === id);
+        if(!p) return;
+        let sum = 0;
+        categorias.forEach(c => sum += (parseInt(p.scores[c]) || 0));
+        const cell = document.getElementById(`t-${id}`);
+        if(cell) cell.innerText = sum;
+    }
+
+    function removePlayer(id) {
+        if(confirm("¿Quitar jugador?")) {
+            players = players.filter(p => p.id !== id);
+            save();
+            location.reload();
+        }
+    }
+
+    function save() { localStorage.setItem('generala_data', JSON.stringify(players)); }
 
     function resetGame() {
-        if(confirm("¿Estás seguro de que quieres borrar todos los puntos de la partida?")) {
-            document.querySelectorAll('.score-input').forEach(i => i.value = '');
-            document.querySelectorAll('.total-val').forEach(v => v.innerText = '0');
+        if(confirm("¿Borrar todos los datos y empezar de cero?")) {
+            localStorage.removeItem('generala_data');
+            location.reload();
         }
     }
 
     init();
 </script>
-
 </body>
 </html>
