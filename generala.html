@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Generala - Anotador Pro</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --bg: #f1f3f4;
+            --text: #202124;
+            --success: #34a853;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text);
+            margin: 0; 
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container { width: 100%; max-width: 600px; }
+
+        .header-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 { margin: 0 0 15px 0; text-align: center; color: var(--primary); }
+
+        .input-group { display: flex; gap: 10px; }
+        input[type="text"] { 
+            flex: 1; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 16px;
+        }
+
+        .btn-add { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table { border-collapse: collapse; width: 100%; min-width: 300px; }
+        th, td { border-bottom: 1px solid #f0f0f0; padding: 10px; text-align: center; }
+        
+        .cat-name { 
+            text-align: left; 
+            font-weight: bold; 
+            background: #f8f9fa; 
+            position: sticky; 
+            left: 0; 
+            z-index: 2;
+            color: #5f6368;
+            min-width: 100px;
+        }
+
+        .score-input { 
+            width: 55px; 
+            height: 40px; 
+            border: 1px solid #ced4da; 
+            border-radius: 6px; 
+            text-align: center; 
+            font-size: 18px; 
+            font-weight: bold;
+        }
+
+        .total-row { background: var(--primary); color: white; font-weight: bold; }
+        .total-val { font-size: 20px; color: #fff; }
+
+        .btn-reset { 
+            background: #ea4335; 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-card">
+        <h2>🎲 Generala</h2>
+        <div class="input-group">
+            <input type="text" id="playerName" placeholder="Nombre del jugador...">
+            <button class="btn-add" onclick="addPlayer()">Añadir</button>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="gameTable">
+            <thead>
+                <tr id="hRow"><th class="cat-name">JUGADAS</th></tr>
+            </thead>
+            <tbody id="bRow"></tbody>
+            <tfoot>
+                <tr id="fRow" class="total-row"><td class="cat-name" style="background: var(--primary); color:white;">TOTAL</td></tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <button class="btn-reset" onclick="resetGame()">Reiniciar Puntos</button>
+</div>
+
+<script>
+    const categorias = ["1", "2", "3", "4", "5", "6", "Escalera", "Full", "Póker", "Generala", "Doble G."];
+    let pCount = 0;
+
+    function init() {
+        const b = document.getElementById('bRow');
+        categorias.forEach(c => {
+            b.innerHTML += `<tr id="r-${c}"><td class="cat-name">${c}</td></tr>`;
+        });
+    }
+
+    function addPlayer() {
+        const inp = document.getElementById('playerName');
+        const name = inp.value.trim();
+        if(!name) return;
+
+        document.getElementById('hRow').innerHTML += `<th>${name}</th>`;
+        categorias.forEach(c => {
+            const r = document.getElementById(`r-${c}`);
+            r.innerHTML += `<td><input type="number" class="score-input p-${pCount}" oninput="calc(${pCount})" placeholder="0"></td>`;
+        });
+        document.getElementById('fRow').innerHTML += `<td id="t-${pCount}" class="total-val">0</td>`;
+        
+        inp.value = '';
+        pCount++;
+    }
+
+    function calc(idx) {
+        let sum = 0;
+        document.querySelectorAll(`.p-${idx}`).forEach(i => {
+            sum += (parseInt(i.value) || 0);
+        });
+        document.getElementById(`t-${idx}`).innerText = sum;
+    }
+
+    function resetGame() {
+        if(confirm("¿Estás seguro de que quieres borrar todos los puntos de la partida?")) {
+            document.querySelectorAll('.score-input').forEach(i => i.value = '');
+            document.querySelectorAll('.total-val').forEach(v => v.innerText = '0');
+        }
+    }
+
+    init();
+</script>
+
+</body>
+</html>
