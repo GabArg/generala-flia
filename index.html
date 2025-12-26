@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Generala Inteligente</title>
+    <title>Generala Inteligente - Final</title>
     <style>
-        :root { --primary: #1a73e8; --bg: #f1f3f4; --text: #202124; --danger: #ea4335; }
+        :root { --primary: #1a73e8; --bg: #f1f3f4; --text: #202124; --danger: #ea4335; --gray: #9aa0a6; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 900px; }
         .header-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -14,17 +14,20 @@
         .btn-add { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow-x: auto; margin-bottom: 15px; }
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: center; min-width: 120px; }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: center; min-width: 140px; }
         .cat-name { text-align: left; background: #f8f9fa; font-weight: bold; min-width: 100px; position: sticky; left: 0; z-index: 2; }
-        .player-name-edit { border: none; background: transparent; color: white; font-weight: bold; text-align: center; width: 90px; font-size: 14px; }
         th { background: #2c3e50; color: white; }
+        .player-name-edit { border: none; background: transparent; color: white; font-weight: bold; text-align: center; width: 90px; }
         
-        /* Estilos de botones de juego */
-        .game-btn { padding: 6px 4px; font-size: 11px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: white; margin: 2px; display: inline-block; width: 45%; }
+        .game-btn { padding: 8px 4px; font-size: 11px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; background: white; margin: 2px; width: 30%; }
         .game-btn.active { background: #34a853; color: white; border-color: #34a853; }
-        .num-select { padding: 8px; border-radius: 6px; font-weight: bold; border: 1px solid #ccc; width: 80%; }
+        .game-btn.tacho { background: #feebeb; color: #d93025; font-weight: bold; border-color: #f28b82; }
+        .game-btn.tacho.active { background: #d93025; color: white; }
         
-        .total-row { background: var(--primary); color: white; font-weight: bold; }
+        .num-select { padding: 8px; border-radius: 6px; font-weight: bold; width: 90%; }
+        .is-tacho { background: #f1f3f4; color: #9aa0a6; }
+
+        .total-row { background: var(--primary); color: white; font-weight: bold; font-size: 1.2em; }
         .btn-reset { background: var(--danger); color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -32,7 +35,7 @@
 
 <div class="container">
     <div class="header-card">
-        <h2 style="margin:0 0 10px 0; text-align:center; color:var(--primary);">🎲 Anotador Inteligente</h2>
+        <h2 style="margin:0 0 10px 0; text-align:center; color:var(--primary);">🎲 Anotador Oficial</h2>
         <div class="input-group">
             <input type="text" id="playerName" placeholder="Nombre...">
             <button class="btn-add" onclick="addPlayer()">+ Añadir</button>
@@ -45,7 +48,7 @@
             <tfoot><tr id="fRow" class="total-row"><td class="cat-col" style="background:var(--primary); color:white;">TOTAL</td></tr></tfoot>
         </table>
     </div>
-    <button class="btn-reset" onclick="resetGame()">Nueva Partida (Borrar todo)</button>
+    <button class="btn-reset" onclick="resetGame()">Nueva Partida</button>
 </div>
 
 <script>
@@ -58,108 +61,84 @@
         {id: "Doble G.", puntos: 100, servido: 100}
     ];
     
-    let players = JSON.parse(localStorage.getItem('generala_v2')) || [];
+    let players = JSON.parse(localStorage.getItem('generala_final')) || [];
 
     function init() {
         const b = document.getElementById('bRow');
         b.innerHTML = "";
-        
-        // Filas para números 1-6
-        categoriasNum.forEach(c => {
-            b.innerHTML += `<tr id="r-${c}"><td class="cat-col">Número ${c}</td></tr>`;
-        });
-        // Filas para juegos especiales
-        categoriasJuego.forEach(c => {
-            b.innerHTML += `<tr id="r-${c.id}"><td class="cat-col">${c.id}</td></tr>`;
-        });
+        categoriasNum.forEach(c => b.innerHTML += `<tr id="r-${c}"><td class="cat-col">Número ${c}</td></tr>`);
+        categoriasJuego.forEach(c => b.innerHTML += `<tr id="r-${c.id}"><td class="cat-col">${c.id}</td></tr>`);
 
-        const tempPlayers = [...players];
+        const temp = [...players];
         players = []; 
         document.getElementById('hRow').innerHTML = '<th class="cat-col">JUGADAS</th>';
         document.getElementById('fRow').innerHTML = '<td class="cat-col" style="background:var(--primary); color:white;">TOTAL</td>';
-        tempPlayers.forEach(p => addPlayer(p.name, p.scores, p.id));
+        temp.forEach(p => addPlayer(p.name, p.scores, p.id));
     }
 
-    function addPlayer(existingName = null, existingScores = {}, existingId = null) {
-        const inp = document.getElementById('playerName');
-        const name = existingName || inp.value.trim();
+    function addPlayer(name, scores = {}, id = null) {
+        if(!name) name = document.getElementById('playerName').value.trim();
         if(!name) return;
 
-        const id = existingId || `p-${Date.now()}`;
-        if(!existingName) {
-            players.push({ id, name, scores: {} });
-            save();
-        }
+        const pid = id || `p-${Date.now()}`;
+        if(!id) { players.push({ id: pid, name, scores: {} }); save(); }
 
-        document.getElementById('hRow').innerHTML += `<th><input type="text" class="player-name-edit" value="${name}" oninput="editName('${id}', this.value)"></th>`;
+        document.getElementById('hRow').innerHTML += `<th><input type="text" class="player-name-edit" value="${name}" oninput="editName('${pid}', this.value)"></th>`;
         
-        // Celdas para números (SELECT)
         categoriasNum.forEach(c => {
             const row = document.getElementById(`r-${c}`);
-            const savedVal = existingScores[c] || 0;
-            const cantDados = savedVal / parseInt(c);
+            const val = scores[c];
+            const isTacho = val === -1;
+            const cant = isTacho ? 0 : (val / parseInt(c));
             
             row.innerHTML += `<td>
-                <select class="num-select" onchange="updateNum('${id}', '${c}', this.value)">
-                    <option value="0">Tachar</option>
-                    ${[1,2,3,4,5].map(n => `<option value="${n}" ${n==cantDados?'selected':''}>${n} dados (${n*c})</option>`).join('')}
+                <select class="num-select ${isTacho?'is-tacho':''}" onchange="updateNum('${pid}', '${c}', this.value)">
+                    <option value="none">Libre</option>
+                    <option value="-1" ${isTacho?'selected':''}>X TACHADO</option>
+                    ${[1,2,3,4,5].map(n => `<option value="${n}" ${n==cant && !isTacho?'selected':''}>${n} dados (${n*c})</option>`).join('')}
                 </select>
             </td>`;
         });
 
-        // Celdas para juegos (BOTONES)
         categoriasJuego.forEach(c => {
             const row = document.getElementById(`r-${c.id}`);
-            const savedVal = existingScores[c.id] || 0;
+            const val = scores[c.id];
             row.innerHTML += `<td>
-                <button class="game-btn ${savedVal==c.puntos?'active':''}" onclick="updateJuego('${id}', '${c.id}', ${c.puntos}, this)">Armado</button>
-                <button class="game-btn ${savedVal==c.servido?'active':''}" onclick="updateJuego('${id}', '${c.id}', ${c.servido}, this)">Servido</button>
+                <button class="game-btn ${val==c.puntos?'active':''}" onclick="updateJuego('${pid}', '${c.id}', ${c.puntos}, this)">A</button>
+                <button class="game-btn ${val==c.servido?'active':''}" onclick="updateJuego('${pid}', '${c.id}', ${c.servido}, this)">S</button>
+                <button class="game-btn tacho ${val===-1?'active':''}" onclick="updateJuego('${pid}', '${c.id}', -1, this)">X</button>
             </td>`;
         });
 
-        document.getElementById('fRow').innerHTML += `<td id="t-${id}" class="total-val">0</td>`;
-        inp.value = '';
-        calcTotal(id);
+        document.getElementById('fRow').innerHTML += `<td id="t-${pid}" class="total-val">0</td>`;
+        document.getElementById('playerName').value = '';
+        calcTotal(pid);
     }
 
-    function updateNum(id, cat, cant) {
-        const p = players.find(p => p.id === id);
-        p.scores[cat] = parseInt(cant) * parseInt(cat);
+    function updateNum(pid, cat, val) {
+        const p = players.find(p => p.id === pid);
+        p.scores[cat] = val === "none" ? undefined : (val === "-1" ? -1 : parseInt(val) * parseInt(cat));
         save();
-        calcTotal(id);
+        location.reload(); // Recarga para aplicar estilos de "tachado"
     }
 
-    function updateJuego(id, catId, pts, btn) {
-        const p = players.find(p => p.id === id);
-        const yaTeniaEsePuntaje = (p.scores[catId] === pts);
-        
-        // Limpiar otros botones de la misma celda
-        const cell = btn.parentElement;
-        cell.querySelectorAll('.game-btn').forEach(b => b.classList.remove('active'));
-
-        if(yaTeniaEsePuntaje) {
-            p.scores[catId] = 0; // Si toca el mismo, tacha
-        } else {
-            p.scores[catId] = pts;
-            btn.classList.add('active');
-        }
+    function updateJuego(pid, catId, pts, btn) {
+        const p = players.find(p => p.id === pid);
+        p.scores[catId] = (p.scores[catId] === pts) ? undefined : pts;
         save();
-        calcTotal(id);
+        location.reload();
     }
 
-    function calcTotal(id) {
-        const p = players.find(p => p.id === id);
+    function calcTotal(pid) {
+        const p = players.find(p => p.id === pid);
         let sum = 0;
-        Object.values(p.scores).forEach(v => sum += (v || 0));
-        document.getElementById(`t-${id}`).innerText = sum;
+        Object.values(p.scores).forEach(v => { if(v && v !== -1) sum += v; });
+        document.getElementById(`t-${pid}`).innerText = sum;
     }
 
-    function save() { localStorage.setItem('generala_v2', JSON.stringify(players)); }
+    function save() { localStorage.setItem('generala_final', JSON.stringify(players)); }
     function editName(id, val) { players.find(p => p.id === id).name = val; save(); }
-    
-    function resetGame() {
-        if(confirm("¿Borrar todo?")) { localStorage.removeItem('generala_v2'); location.reload(); }
-    }
+    function resetGame() { if(confirm("¿Nueva partida?")) { localStorage.removeItem('generala_final'); location.reload(); } }
 
     init();
 </script>
