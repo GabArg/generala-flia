@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3655/3655610.png?v=4">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3655/3655610.png?v=4">
-    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3655/3655610.png?v=4">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3655/3655610.png?v=5">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3655/3655610.png?v=5">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/3655/3655610.png?v=5">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Generala Amiga - Pro Edition</title>
+    <title>Generala Amiga - Reglas Oficiales</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { --primary: #f1c40f; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --success: #27ae60; --danger: #e74c3c; }
@@ -23,9 +23,9 @@
         @keyframes saltar { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
         .contenedor-tabla { overflow-x: auto; width: 100%; margin-top: 15px; border-radius: 10px; }
         table { width: 100%; border-collapse: collapse; background: #252525; font-size: 0.85rem; }
-        th, td { border: 1px solid #333; padding: 8px 3px; text-align: center; min-width: 50px; }
-        th { background: #333; color: var(--primary); position: relative; }
-        .btn-eliminar-jug { color: var(--danger); font-size: 0.7rem; display: block; cursor: pointer; margin-top: 2px; }
+        th, td { border: 1px solid #333; padding: 8px 3px; text-align: center; min-width: 55px; }
+        th { background: #333; color: var(--primary); }
+        .btn-eliminar-jug { color: var(--danger); font-size: 0.65rem; display: block; cursor: pointer; margin-top: 3px; text-decoration: underline; }
         .celda-activa { background: rgba(39, 174, 96, 0.2); cursor: pointer; color: #2ecc71; font-weight: bold; }
         .celda-tachar { color: var(--danger); font-style: italic; }
         .anotado { color: var(--primary); font-weight: bold; }
@@ -54,7 +54,7 @@
             <button id="btn-lanzar" onclick="lanzar()">LANZAR (3)</button>
             <button id="btn-undo" class="btn-undo oculto" onclick="deshacerUltimaJugada()">↩ Deshacer</button>
         </div>
-        <p id="instruccion">Tira los dados</p>
+        <p id="instruccion" style="font-size:0.9rem; margin-top:5px;">Tira los dados</p>
         <div class="contenedor-tabla">
             <table>
                 <thead><tr id="header-jugadores"><th>Categoría</th></tr></thead>
@@ -73,7 +73,7 @@
 
 <script>
     let jugadores = [], indiceTurno = 0, tiros = 3, dadosValores = [0,0,0,0,0], bloqueados = [false, false, false, false, false], celdasOcupadas = 0;
-    let ultimaJugada = null; // Para la función deshacer
+    let ultimaJugada = null;
     const categorias = ["1", "2", "3", "4", "5", "6", "Escalera", "Full", "Poker", "Generala", "Doble Gen"];
     const layouts = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 3, 6, 2, 5, 8] };
 
@@ -84,11 +84,11 @@
             const celda = document.getElementById(`p-${cat}-${i}`);
             return celda ? { texto: celda.innerText, fixed: celda.getAttribute('data-fixed') } : null;
         }))};
-        localStorage.setItem('partida_v4', JSON.stringify(estado));
+        localStorage.setItem('partida_v5', JSON.stringify(estado));
     }
 
     function recuperarPartida() {
-        const guardado = localStorage.getItem('partida_v4');
+        const guardado = localStorage.getItem('partida_v5');
         if (!guardado) return;
         const estado = JSON.parse(guardado);
         jugadores = estado.jugadores;
@@ -129,7 +129,7 @@
         let header = '<th>Cat.</th>';
         let footer = '<td>TOTAL</td>';
         jugadores.forEach((j, idx) => {
-            header += `<th>${j.nombre.substring(0,5)}<span class="btn-eliminar-jug" onclick="eliminarJugador(${idx})">✖ Borrar</span></th>`;
+            header += `<th>${j.nombre.substring(0,5)}<span class="btn-eliminar-jug" onclick="eliminarJugador(${idx})">✖</span></th>`;
             footer += `<td id="total-${idx}">0</td>`;
         });
         document.getElementById('header-jugadores').innerHTML = header;
@@ -144,23 +144,15 @@
     }
 
     function eliminarJugador(idx) {
-        if(confirm(`¿Eliminar a ${jugadores[idx].nombre} de la partida?`)) {
+        if(confirm(`¿Eliminar a ${jugadores[idx].nombre}?`)) {
             jugadores.splice(idx, 1);
             if (jugadores.length === 0) { abortarPartida(); return; }
             if (indiceTurno >= jugadores.length) indiceTurno = 0;
             renderTabla();
-            recuperarPuntosDeCeldas(); // Re-vincula los puntos que ya estaban
-            recalcularTotales();
             actualizarTurno();
             guardarPartida();
+            location.reload(); // Recargamos para limpiar la tabla visualmente
         }
-    }
-
-    function recuperarPuntosDeCeldas() {
-        // Esta función ayuda a que si borrás a alguien, los puntos de los demás no se muevan de lugar
-        const guardado = JSON.parse(localStorage.getItem('partida_v4'));
-        if (!guardado) return;
-        // (Lógica de re-poblado simplificada por renderTabla)
     }
 
     function lanzar() {
@@ -185,19 +177,27 @@
         const vals = Object.values(conteo);
         const unicosStr = [...new Set(dadosValores.filter(v => v > 0))].sort((a,b)=>a-b).join('');
         const bono = esServida ? 5 : 0;
-        const yaTieneGenerala = (document.getElementById(`p-Generala-${indiceTurno}`).getAttribute('data-fixed') === 'true');
+        
+        const celdaGen = document.getElementById(`p-Generala-${indiceTurno}`);
+        const estadoGen = celdaGen.getAttribute('data-fixed') === 'true';
+        const valorGen = celdaGen.innerText;
 
         categorias.forEach(cat => {
-            let pts = 0;
-            if (!isNaN(cat)) pts = conteo[parseInt(cat)] * parseInt(cat);
-            else if (cat === "Escalera" && (unicosStr === "12345" || unicosStr === "23456" || unicosStr === "13456")) pts = 20 + bono;
-            else if (cat === "Full" && vals.includes(3) && vals.includes(2)) pts = 30 + bono;
-            else if (cat === "Poker" && (vals.includes(4) || vals.includes(5))) pts = 40 + bono;
-            else if (cat === "Generala" && vals.includes(5) && !yaTieneGenerala) pts = 50;
-            else if (cat === "Doble Gen" && vals.includes(5) && yaTieneGenerala) pts = 100;
-
             const celda = document.getElementById(`p-${cat}-${indiceTurno}`);
             if (celda && celda.getAttribute('data-fixed') !== 'true') {
+                let pts = 0;
+                
+                // LÓGICA DE CATEGORÍAS
+                if (!isNaN(cat)) pts = conteo[parseInt(cat)] * parseInt(cat);
+                else if (cat === "Escalera" && (unicosStr === "12345" || unicosStr === "23456" || unicosStr === "13456")) pts = 20 + bono;
+                else if (cat === "Full" && vals.includes(3) && vals.includes(2)) pts = 30 + bono;
+                else if (cat === "Poker" && (vals.includes(4) || vals.includes(5))) pts = 40 + bono;
+                else if (cat === "Generala" && vals.includes(5)) pts = 50;
+                else if (cat === "Doble Gen" && vals.includes(5) && estadoGen && valorGen !== "0") pts = 100;
+
+                // REGLA: Bloquear Doble Gen si la primera no está ocupada
+                if (cat === "Doble Gen" && !estadoGen) return;
+
                 celda.innerText = pts === 0 ? "X" : pts;
                 celda.classList.add('celda-activa');
                 if (pts === 0) celda.classList.add('celda-tachar');
@@ -208,9 +208,21 @@
 
     function anotar(cat, pts, celda) {
         if(confirm(`¿Confirmar ${pts === 0 ? 'Tachar' : pts} en ${cat}?`)) {
-            ultimaJugada = { cat, pts, indiceJugador: indiceTurno }; // Guardamos para deshacer
+            ultimaJugada = { cat, pts, indiceJugador: indiceTurno, autoTachadoDoble: false };
+            
+            // REGLA ESPECIAL: Si tachás la Generala, se tacha la Doble automáticamente
+            if (cat === "Generala" && pts === 0) {
+                const celdaDoble = document.getElementById(`p-Doble Gen-${indiceTurno}`);
+                if (celdaDoble && celdaDoble.getAttribute('data-fixed') !== 'true') {
+                    celdaDoble.innerText = "0";
+                    celdaDoble.className = "anotado celda-tachar";
+                    celdaDoble.setAttribute('data-fixed', 'true');
+                    celdasOcupadas++;
+                    ultimaJugada.autoTachadoDoble = true;
+                }
+            }
+
             celda.innerText = pts; celda.className = 'anotado'; celda.setAttribute('data-fixed', 'true');
-            celda.onclick = null;
             recalcularTotales(); celdasOcupadas++;
             indiceTurno = (indiceTurno + 1) % jugadores.length;
             actualizarTurno();
@@ -221,13 +233,18 @@
     function deshacerUltimaJugada() {
         if (!ultimaJugada) return;
         if (confirm("¿Deshacer la última anotación?")) {
-            indiceTurno = ultimaJugada.indiceJugador; // Vuelve el turno al que se equivocó
+            indiceTurno = ultimaJugada.indiceJugador;
             const celda = document.getElementById(`p-${ultimaJugada.cat}-${indiceTurno}`);
-            celda.innerText = "-";
-            celda.className = "celda-puntos";
-            celda.removeAttribute('data-fixed');
+            celda.innerText = "-"; celda.className = "celda-puntos"; celda.removeAttribute('data-fixed');
             celdasOcupadas--;
-            ultimaJugada = null; // Solo se puede deshacer una vez
+
+            if (ultimaJugada.autoTachadoDoble) {
+                const celdaDoble = document.getElementById(`p-Doble Gen-${indiceTurno}`);
+                celdaDoble.innerText = "-"; celdaDoble.className = "celda-puntos"; celdaDoble.removeAttribute('data-fixed');
+                celdasOcupadas--;
+            }
+
+            ultimaJugada = null;
             recalcularTotales();
             actualizarTurno();
             guardarPartida();
@@ -241,7 +258,6 @@
                 const celda = document.getElementById(`p-${cat}-${idx}`);
                 if (celda && celda.getAttribute('data-fixed') === 'true') suma += parseInt(celda.innerText) || 0;
             });
-            j.total = suma;
             const elTotal = document.getElementById(`total-${idx}`);
             if (elTotal) elTotal.innerText = suma;
         });
@@ -273,7 +289,7 @@
         }
     }
 
-    function abortarPartida() { if(confirm("¿Anular partida actual?")) { localStorage.removeItem('partida_v4'); location.reload(); } }
+    function abortarPartida() { if(confirm("¿Anular partida actual?")) { localStorage.removeItem('partida_v5'); location.reload(); } }
     function limpiarOtras() { document.querySelectorAll('.celda-activa').forEach(c => { if(c.getAttribute('data-fixed') !== 'true') { c.innerText = "-"; c.classList.remove('celda-activa', 'celda-tachar'); c.onclick = null; } }); }
     function mostrarHistorial() {
         const h = JSON.parse(localStorage.getItem('gen_hist_v3')) || [];
